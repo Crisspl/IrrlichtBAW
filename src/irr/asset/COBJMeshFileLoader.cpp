@@ -397,8 +397,6 @@ asset::SAssetBundle COBJMeshFileLoader::loadAsset(io::IReadFile* _file, const as
 
         meshbuffer->getMaterial() = ctx.Materials[m]->Material;
 
-        auto desc = core::make_smart_refctd_ptr<asset::ICPUMeshDataFormatDesc>();
-
         bool doesntNeedIndices = true;
         size_t baseVertex = ctx.Materials[m]->Indices[0];
         for (size_t i=1; i<ctx.Materials[m]->Indices.size(); i++)
@@ -432,13 +430,22 @@ asset::SAssetBundle COBJMeshFileLoader::loadAsset(io::IReadFile* _file, const as
         }
 
 		{
-			auto vertexbuf = core::make_smart_refctd_ptr<asset::ICPUBuffer>(actualVertexCount*sizeof(SObjVertex));
-			desc->setVertexAttrBuffer(core::smart_refctd_ptr(vertexbuf),asset::EVAI_ATTR0,asset::EF_R32G32B32_SFLOAT,sizeof(SObjVertex),0);
-			desc->setVertexAttrBuffer(core::smart_refctd_ptr(vertexbuf),asset::EVAI_ATTR2,asset::EF_R32G32_SFLOAT,sizeof(SObjVertex),12);
-			desc->setVertexAttrBuffer(core::smart_refctd_ptr(vertexbuf),asset::EVAI_ATTR3,asset::EF_A2B10G10R10_SNORM_PACK32,sizeof(SObjVertex),20); //normal
-			memcpy(vertexbuf->getPointer(),ctx.Materials[m]->Vertices.data()+baseVertex,vertexbuf->getSize());
+			ICPUMeshBuffer::SBufferBinding bufferBinding;
+			bufferBinding.buffer = core::make_smart_refctd_ptr<asset::ICPUBuffer>(actualVertexCount * sizeof(SObjVertex));
+
+			static std::array<std::tuple<uint16_t, E_FORMAT, uint32_t>, 3> perIndexDataThatChanges{ std::make_tuple(0, asset::EF_R32G32B32_SFLOAT, 0), std::make_tuple(2, asset::EF_R32G32_SFLOAT, 12), std::make_tuple(3, asset::EF_A2B10G10R10_SNORM_PACK32, 20) };
+			auto vertexbuf = core::make_smart_refctd_ptr<asset::ICPUBuffer>(actualVertexCount * sizeof(SObjVertex));
+			meshbuffer->setVertexBufferBinding(std::move(bufferBinding), 0ull);
+			meshbuffer->setVertexBufferBindingParams(0ull, sizeof(SObjVertex));
+
+			for (auto& attributeIndexExtra : perIndexDataThatChanges)
+				[&](auto attribIndex, auto formatToSend, auto offsetToSend, auto bindingIndex)
+			{
+				meshbuffer->setVertexAttribFormat(attribIndex, bindingIndex, formatToSend, offsetToSend);
+			}(std::get<0>(attributeIndexExtra), std::get<1>(attributeIndexExtra), std::get<2>(attributeIndexExtra), 0ull);
+
+			memcpy(vertexbuf->getPointer(), ctx.Materials[m]->Vertices.data() + baseVertex, vertexbuf->getSize());
 		}
-		meshbuffer->setMeshDataAndFormat(std::move(desc));
 
         SAssetBundle bundle({std::move(meshbuffer)});
         _override->insertAssetIntoCache(bundle, genKeyForMeshBuf(ctx, _file->getFileName().c_str(), ctx.Materials[m]->Name, ctx.Materials[m]->Group), ctx.inner, 1u);
@@ -561,14 +568,14 @@ const char* COBJMeshFileLoader::readTextures(const SContext& _ctx, const char* b
 	}
 	if (clamp)
     {
-        for (size_t i=0; i<_IRR_MATERIAL_MAX_TEXTURES_; i++)
+        for (size_t i=0; i< video::OGL_STATE_MAX_TEXTURES; i++)
         {
-            currMaterial->Material.TextureLayer[i].SamplingParams.TextureWrapU = video::ETC_CLAMP_TO_EDGE;
-            currMaterial->Material.TextureLayer[i].SamplingParams.TextureWrapV = video::ETC_CLAMP_TO_EDGE;
-            currMaterial->Material.TextureLayer[i].SamplingParams.TextureWrapW = video::ETC_CLAMP_TO_EDGE;
+            currMaterial->Material.TextureLayer[i].SamplingParams.TextureWrapU = ISampler::E_TEXTURE_CLAMP::ETC_CLAMP_TO_EDGE;
+            currMaterial->Material.TextureLayer[i].SamplingParams.TextureWrapV = ISampler::E_TEXTURE_CLAMP::ETC_CLAMP_TO_EDGE;
+            currMaterial->Material.TextureLayer[i].SamplingParams.TextureWrapW = ISampler::E_TEXTURE_CLAMP::ETC_CLAMP_TO_EDGE;
         }
     }
-	for (size_t i = 0; i < _IRR_MATERIAL_MAX_TEXTURES_; i++)
+	for (size_t i = 0; i < video::OGL_STATE_MAX_TEXTURES; i++)
 		currMaterial->Material.TextureLayer[i].SamplingParams.AnisotropicFilter = 16u;
 
 	io::path texname(textureNameBuf);
