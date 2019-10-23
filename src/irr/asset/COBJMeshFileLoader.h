@@ -170,10 +170,14 @@ private:
             SObjMtl() : Bumpiness (1.0f), Illumination(0),
                 RecalculateNormals(false)
             {
+				/*
+					Is it a dead code? If not, how can I set it?
+
                 Material.Shininess = 0.0f;
                 Material.AmbientColor = video::SColorf(0.2f, 0.2f, 0.2f, 1.0f).toSColor();
                 Material.DiffuseColor = video::SColorf(0.8f, 0.8f, 0.8f, 1.0f).toSColor();
                 Material.SpecularColor = video::SColorf(1.0f, 1.0f, 1.0f, 1.0f).toSColor();
+				*/
             }
 
             SObjMtl(const SObjMtl& o)
@@ -181,13 +185,14 @@ private:
                 Bumpiness(o.Bumpiness), Illumination(o.Illumination),
                 RecalculateNormals(false)
             {
-                Material = o.Material;
+                Pipeline = o.Pipeline; // No operator for that, should pipeline share a material?
             }
 
             core::map<SObjVertex, int> VertMap;
             core::vector<SObjVertex> Vertices;
             core::vector<uint32_t> Indices;
-            video::SCPUMaterial Material;
+            //video::SCPUMaterial Material;
+			ICPURenderpassIndependentPipeline Pipeline;
             std::string Name;
             std::string Group;
             float Bumpiness;

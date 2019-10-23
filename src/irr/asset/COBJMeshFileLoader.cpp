@@ -395,7 +395,9 @@ asset::SAssetBundle COBJMeshFileLoader::loadAsset(io::IReadFile* _file, const as
         auto meshbuffer = core::make_smart_refctd_ptr<asset::ICPUMeshBuffer>();
         mesh->addMeshBuffer(core::smart_refctd_ptr(meshbuffer));
 
-        meshbuffer->getMaterial() = ctx.Materials[m]->Material;
+		// meshbuffer should copy ctx Material
+		// but how? It requires refactoring ISceneNode
+        //meshbuffer->getMaterial() = ctx.Materials[m]->Material;
 
         bool doesntNeedIndices = true;
         size_t baseVertex = ctx.Materials[m]->Indices[0];
@@ -420,9 +422,11 @@ asset::SAssetBundle COBJMeshFileLoader::loadAsset(io::IReadFile* _file, const as
             actualVertexCount = ctx.Materials[m]->Vertices.size();
 
 			{
-				auto indexbuf = core::make_smart_refctd_ptr<asset::ICPUBuffer>(sizeof(uint32_t)*ctx.Materials[m]->Indices.size());
-				memcpy(indexbuf->getPointer(),&ctx.Materials[m]->Indices[0],indexbuf->getSize());
-				desc->setIndexBuffer(std::move(indexbuf));
+				ICPUMeshBuffer::SBufferBinding bufferBinding;
+				bufferBinding.buffer = core::make_smart_refctd_ptr<asset::ICPUBuffer>(sizeof(uint32_t) * ctx.Materials[m]->Indices.size());
+
+				memcpy(bufferBinding.buffer->getPointer(),&ctx.Materials[m]->Indices[0], bufferBinding.buffer->getSize());
+				meshbuffer->setIndexBufferBinding(std::move(bufferBinding));
 			}
 
             meshbuffer->setIndexType(asset::EIT_32BIT);
@@ -659,6 +663,7 @@ void COBJMeshFileLoader::readMTL(SContext& _ctx, const char* fileName, const io:
 	mtlReader->read((void*)buf, filesize);
 	const char* bufEnd = buf+filesize;
 
+	// such object should have ICPU/GPURenderpassIndependentPipeline against Material (IGPUMaterial), but how can I get access to material using ICPU/GPURenderpassIndependentPipeline?
 	SObjMtl* currMaterial = 0;
 
 	const char* bufPtr = buf;
