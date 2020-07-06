@@ -3,7 +3,7 @@
 
 #include "irr/video/IGPUDescriptorSet.h"
 #include "irr/macros.h"
-#include "COpenGLExtensionHandler.h"
+#include "COpenGlFunctionTable.h"
 #include "COpenGLBuffer.h"
 #include "COpenGLBufferView.h"
 #include "COpenGLImage.h"

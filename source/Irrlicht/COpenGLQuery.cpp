@@ -1,6 +1,6 @@
 #include "COpenGLQuery.h"
 #include "COpenGLBuffer.h"
-#include "COpenGLExtensionHandler.h"
+#include "COpenGlFunctionTable.h"
 
 #ifdef _IRR_COMPILE_WITH_OPENGL_
 namespace irr

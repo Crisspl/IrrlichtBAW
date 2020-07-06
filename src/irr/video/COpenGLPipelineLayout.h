@@ -2,7 +2,7 @@
 #define __IRR_C_OPENGL_PIPELINE_LAYOUT_H_INCLUDED__
 
 #include "irr/video/IGPUPipelineLayout.h"
-#include "COpenGLExtensionHandler.h"
+#include "COpenGlFunctionTable.h"
 
 #ifdef _IRR_COMPILE_WITH_OPENGL_
 namespace irr

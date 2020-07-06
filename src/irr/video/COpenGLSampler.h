@@ -2,7 +2,7 @@
 #define __IRR_C_OPENGL_SAMPLER_H_INCLUDED__
 
 #include "irr/video/IGPUSampler.h"
-#include "COpenGLExtensionHandler.h"
+#include "COpenGlFunctionTable.h"
 #include <algorithm>
 
 #ifdef _IRR_COMPILE_WITH_OPENGL_

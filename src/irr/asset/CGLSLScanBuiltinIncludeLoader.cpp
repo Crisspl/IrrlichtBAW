@@ -2,7 +2,7 @@
 
 #include <cctype>
 #include <regex>
-#include "COpenGLExtensionHandler.h"
+#include "COpenGlFunctionTable.h"
 
 using namespace irr;
 using namespace asset;

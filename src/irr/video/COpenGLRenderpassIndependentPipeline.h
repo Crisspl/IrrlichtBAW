@@ -3,7 +3,7 @@
 
 #include "irr/video/IGPURenderpassIndependentPipeline.h"
 
-#include "COpenGLExtensionHandler.h"
+#include "COpenGlFunctionTable.h"
 #include "COpenGLSpecializedShader.h"
 
 #include "irr/video/IOpenGLPipeline.h"

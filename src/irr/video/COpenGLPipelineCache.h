@@ -2,7 +2,7 @@
 #define __IRR_C_OPENGL_PIPELINE_CACHE_H_INCLUDED__
 
 #include "irr/video/IGPUPipelineCache.h"
-#include "COpenGLExtensionHandler.h"
+#include "COpenGlFunctionTable.h"
 #include "irr/video/COpenGLSpecializedShader.h"
 #include "irr/video/COpenGLPipelineLayout.h"
 #include "irr/core/Types.h"
