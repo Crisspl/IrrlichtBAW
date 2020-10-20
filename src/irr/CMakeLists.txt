@@ -358,6 +358,17 @@ macro(irr_target_link_gli _trgt)
 	)
 	target_include_directories(${_trgt} PUBLIC ${THIRD_PARTY_SOURCE_DIR}/gli)
 endmacro()
+macro(irr_target_link_spirv_tools _trgt)
+	add_dependencies(${_trgt} SPIRV)
+	add_dependencies(${_trgt} SPIRV-Tools)
+	add_dependencies(${_trgt} SPIRV-Tools-opt)
+	target_link_libraries(${_trgt} INTERFACE
+		SPIRV SPIRV-Tools SPIRV-Tools-opt
+	)
+	target_include_directories(${_trgt} PUBLIC
+		${THIRD_PARTY_SOURCE_DIR}/SPIRV-Tools/include
+	)
+endmacro()
 
 add_library(Irrlicht STATIC
 	${IRRLICHT_SRCS_COMMON}
@@ -385,6 +396,7 @@ if(_IRR_COMPILE_WITH_GLI_)
 	irr_target_link_gli(Irrlicht)
 endif()
 irr_target_include_parallel_hashmap(Irrlicht)
+irr_target_link_spirv_tools(Irrlicht)
 
 target_link_libraries(Irrlicht INTERFACE ${OPENGL_gl_LIBRARY})
 if (UNIX)
